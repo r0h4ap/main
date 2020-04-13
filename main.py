@@ -2,7 +2,7 @@ from binaryornot.check import is_binary
 import os.path
 from window import *
 from bincomp import BinaryComparator
-from textcomp import TextComparator
+from difflibparser import DifflibParser
 
 
 class Window(QtWidgets.QMainWindow, MainWindowGui):
@@ -57,9 +57,16 @@ class Window(QtWidgets.QMainWindow, MainWindowGui):
                 text = "<span style=\"font-size:14pt; font-weight:600; color:red;\">Binary files didn't converge in {:0.4f}%</span>"
                 w.binary_result(text.format(comparator.failed_percent))
         else:
-            comparator = TextComparator(self.file1_name, self.file2_name)
-            result1, result2 = comparator.compare()
-            w.text_comparing_result(os.path.basename(self.file1_name), os.path.basename(self.file2_name), result1, result2)
+            file1 = open(self.file1_name)
+            file1_content = file1.read()
+            file1.close()
+
+            file2 = open(self.file2_name)
+            file2_content = file2.read()
+            file2.close()
+
+            comparator = DifflibParser(file1_content.splitlines(), file2_content.splitlines())
+            w.text_comparing_result(os.path.basename(self.file1_name), os.path.basename(self.file2_name), file1_content, comparator)
 
 
 def except_hook(cls, exception, traceback):

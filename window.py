@@ -61,7 +61,7 @@ class MainWindowGui(object):
     def binary_result(self, info):
         QtWidgets.QMessageBox.about(self, 'Binary comparing result', info)
 
-    def text_comparing_result(self, name1, name2, text1, text2):
+    def text_comparing_result(self, name1, name2, text1, text2_dict):
         dialog = QtWidgets.QDialog(parent=self)
         dialog.setMinimumSize(QtCore.QSize(480, 150))
 
@@ -85,7 +85,32 @@ class MainWindowGui(object):
         hbox.addWidget(text1_edit)
 
         text2_edit = QtWidgets.QTextEdit()
-        text2_edit.setText(text2)
+        result = ''
+        for d in text2_dict:
+            r = ''
+            line = d['line']
+            code = int(d['code'])
+
+            if code == 0:
+                r = line
+            elif code == 1:
+                r = '<span style=\"color:green;\">+ ' + line + '</span>'
+            elif code == 2:
+                r = '<span style=\"color:red;\">- ' + line + '</span>'
+            elif code == 3:
+                newline = ''
+                for i in range(len(d['newline'])):
+                    s = d['newline'][i]
+                    if i in d['rightchanges'] or i in d['leftchanges']:
+                        newline = newline + '<strong>' + s + '</strong>'
+                    else:
+                        newline = newline + s
+
+                r = '<span style=\"color:red;\">+- ' + newline + '</span>'
+
+            result = result + r + '<br>'
+
+        text2_edit.setText(result)
         text2_edit.setReadOnly(True)
         hbox.addWidget(text2_edit)
         vbox.addLayout(hbox)
@@ -99,7 +124,6 @@ class MainWindowGui(object):
         dialog.show()
 
         ok_button.clicked.connect(dialog.close)
-
 
 
 def pick_file_dialog():
